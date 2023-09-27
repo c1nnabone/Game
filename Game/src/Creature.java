@@ -56,7 +56,7 @@ public abstract class Creature {
                     max = everythrow;
                 }
                 string.append("Выполняется бросок №");
-                string.append(i);
+                string.append(i + 1);
                 string.append("\n");
                 string.append("Результат броска: ");
                 string.append(everythrow);
