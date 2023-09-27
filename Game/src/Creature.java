@@ -6,6 +6,7 @@ public abstract class Creature {
     private int attack;
     private int health;
     private int[] damage;
+    private boolean isAlive;
 
     public Creature(int def, int att, int health, int[] damage) {
         if (def > 1 && def < 30) {
@@ -23,8 +24,12 @@ public abstract class Creature {
         } else {
             throw new IllegalArgumentException("Здоровье может быть равно значениям от 0 до N");
         }
-        this.damage = damage;
-
+        if (damage[1] > damage[0]) {
+            this.damage = damage;
+        } else {
+            throw new IllegalArgumentException("Урон может быть равен M-N (Например 1-6)");
+        }
+        this.isAlive = true;
     }
 
     public int getHealth() {
@@ -43,46 +48,57 @@ public abstract class Creature {
         return defense;
     }
 
+    public void setAlive(boolean alive) {
+        isAlive = alive;
+    }
+
     public static void enemyAttack(Creature creature1, Creature creature2) {
-        StringBuilder string = new StringBuilder();
-        Random rn = new Random();
-        int max = 0;
-        int attmodifier = creature1.getAttack() - creature2.getDefense() + 1;
-        System.out.println("Модификатор атаки:  " + attmodifier);
-        if (attmodifier > 0) {
-            for (int i = 0; i < attmodifier; i++) {
-                int everythrow = cubeThrow();
-                if (everythrow > max) {
-                    max = everythrow;
+        if (creature1.isAlive) {
+            if (creature2.isAlive) {
+                StringBuilder string = new StringBuilder();
+                int max = 0;
+                int attmodifier = creature1.getAttack() - creature2.getDefense() + 1;
+                System.out.println("Модификатор атаки:  " + attmodifier);
+                if (attmodifier > 0) {
+                    for (int i = 0; i < attmodifier; i++) {
+                        int everythrow = cubeThrow();
+                        if (everythrow > max) {
+                            max = everythrow;
+                        }
+                        string.append("Выполняется бросок №");
+                        string.append(i + 1);
+                        string.append("\n");
+                        string.append("Результат броска: ");
+                        string.append(everythrow);
+                        string.append("\n");
+                        System.out.println(string);
+                    }
                 }
-                string.append("Выполняется бросок №");
-                string.append(i + 1);
-                string.append("\n");
-                string.append("Результат броска: ");
-                string.append(everythrow);
-                string.append("\n");
-                System.out.println(string);
+                if (max >= 5) {
+                    System.out.println("Успех! Наносим урон противнику!");
+                    creature2.setHealth(creature2.getHealth() - creature1.dealDamage());
+                    if (creature2.getHealth() <= 0) {
+                        creature2.setAlive(false);
+                        System.out.println("Противник повержен!");
+                    } else {
+                        System.out.println("У противника осталось " + creature2.getHealth() + " здоровья.");
+                    }
+                } else {
+                    System.out.println("Неудача! Никто не получает урон!");
+                }
+            } else {
+                System.out.println("Вы атакуете труп...");
             }
-        }
-        if (max >= 5) {
-            System.out.println("Успех! Наносим урон противнику!");
-            creature2.setHealth(creature2.getHealth() - creature1.dealDamage());
         } else {
-            System.out.println("Неудача! Никто не получает урон!");
+            System.out.println("Трупы не могут атаковать...");
         }
-        System.out.println("У противника осталось " + creature2.getHealth() + " здоровья.");
     }
 
-    public int dealDamage() {
-        Random rn = new Random();
-        int randomDmg = rn.nextInt(this.damage[1] - this.damage[0] + 1) + this.damage[0];
-        return randomDmg;
+    private int dealDamage() {
+        return new Random().nextInt(this.damage[1] - this.damage[0] + 1) + this.damage[0];
     }
 
-    protected static int cubeThrow() {
-        Random rn = new Random();
-        int randomNum = rn.nextInt(6 - 1 + 1) + 1;
-        return randomNum;
+    private static int cubeThrow() {
+        return new Random().nextInt(6 - 1 + 1) + 1;
     }
-
 }
